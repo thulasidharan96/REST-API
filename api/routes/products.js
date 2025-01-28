@@ -19,12 +19,13 @@ router.get('/', (req, res) => {
                 };
             })
         };
-        res.status(200).json(docs);
+        res.status(200).json(response);
     })
     .catch(err => {
         res.status(500).json({ error: err });
     });
 });
+
 
 // Handle POST requests to /products
 router.post('/', (req, res) => {
