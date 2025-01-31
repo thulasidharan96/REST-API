@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const userRoutes = require('./api/routes/user');
+const attendanceRoutes = require('./api/routes/attendance');
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/user', userRoutes);
+app.use('/attendance', attendanceRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Not found');

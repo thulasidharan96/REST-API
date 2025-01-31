@@ -25,6 +25,7 @@ exports.signup = (req, res) => {
           email: req.body.email,
           password: hash,
           RegisterNumber: req.body.RegisterNumber,
+          department: req.body.department,
           role: req.body.role,
         });
         user

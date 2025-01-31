@@ -27,6 +27,12 @@ const userSchema = mongoose.Schema({
             message: props => `${props.value} is not a valid register number! Must be 12 digits starting with 9533`
         }
     },
+    department: {
+        type: String,
+        required: true,
+        enum: ['CSE', 'ECE', 'EEE', 'MECH'],
+        default: 'CSE'
+    },
     role: {
         type: String,
         required: true,
