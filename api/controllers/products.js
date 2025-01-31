@@ -1,11 +1,7 @@
-const express = require('express');
-const router = express.Router();
 const mongoose = require('mongoose');
 const Product = require('../models/product');
-const checkAuth = require('../middleware/check-auth');
 
-// Handle GET requests to /products
-router.get('/', (req, res) => {
+exports.products_get_all = (req, res) => {
     Product.find()
     .select('-__v')
     .exec()
@@ -25,11 +21,30 @@ router.get('/', (req, res) => {
     .catch(err => {
         res.status(500).json({ error: err });
     });
-});
+};
 
+exports.products_get_by_id = (req, res) => {
+    const id = req.params.productId;
+    Product.findById(id)
+        .select('-__v')
+        .exec()
+        .then(doc => {
+            console.log("From database", doc);
+            if (doc) {
+                res.status(200).json(doc);
+            } else {
+                res.status(404).json({
+                    message: 'No valid entry found for provided ID'
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: err });
+        });
+};
 
-// Handle POST requests to /products
-router.post('/',checkAuth, (req, res) => {
+exports.products_create_new = (req, res) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -50,32 +65,9 @@ router.post('/',checkAuth, (req, res) => {
         .catch(err => {
             res.status(500).json({ error: err });
         });
-});
+};
 
-router.get('/:productId', (req, res) => {
-    const id = req.params.productId;
-    Product.findById(id)
-        .select('-__v')
-        .exec()
-        .then(doc => {
-            console.log("From database", doc);
-            if (doc) {
-                res.status(200).json(doc);
-            } else {
-                res.status(404).json({
-                    message: 'No valid entry found for provided ID'
-                });
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ error: err });
-        });
-});
-
-
-// Handle PATCH requests to update a product
-router.patch('/:productId',checkAuth, (req, res) => {
+exports.products_update_by_id = (req, res) => {
     const id = req.params.productId;
     const updateOps = {
         name: req.body.name,
@@ -97,11 +89,9 @@ router.patch('/:productId',checkAuth, (req, res) => {
         .catch(err => {
             res.status(500).json({ error: err });
         });
-});
+};
 
-
-// Handle DELETE requests to remove a product
-router.delete('/:productId',checkAuth, (req, res) => {
+exports.products_delete_by_id = (req, res) => {
     const id = req.params.productId;
     Product.deleteOne({ _id: id })
         .exec()
@@ -115,6 +105,4 @@ router.delete('/:productId',checkAuth, (req, res) => {
             console.error(err);
             res.status(500).json({ error: err });
         });
-});
-
-module.exports = router;
+};

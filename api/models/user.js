@@ -8,7 +8,13 @@ const userSchema = mongoose.Schema({
         unique: true,
         match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
     },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    role: {
+        type: String,
+        required: true,
+        enum: ['admin', 'user'],
+        default: 'user'
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);
