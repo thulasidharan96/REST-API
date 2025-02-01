@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use('/user', userRoutes);
 app.use('/attendance', attendanceRoutes);
+app.use('/getAttendance', attendanceRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Not found');

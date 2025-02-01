@@ -39,7 +39,6 @@ router.post("/", checkAuth, (req, res, next) => {
     .then(result => {
       console.log(result);
       res.status(201).json({
-        message: "Handling POST requests to /attendance",
         createdStudentAttendance: studentAttendance
       });
     })
