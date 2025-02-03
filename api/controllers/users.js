@@ -5,20 +5,17 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 exports.signup = (req, res) => {
-  User.find({ email: req.body.email })
+  User.findOne({ email: req.body.email })
     .exec()
-    .then((user) => {
-      if (user.length >= 1) {
-        return res.status(409).json({
-          message: "User already exists",
-        });
+    .then((existingUser) => {
+      if (existingUser) {
+        return res.status(409).json({ message: "User already exists" });
       }
       bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) {
-          return res.status(500).json({
-            error: err.message,
-          });
+          return res.status(500).json({ error: "Error encrypting the password" });
         }
+
         const user = new User({
           _id: new mongoose.Types.ObjectId(),
           name: req.body.name,
@@ -28,29 +25,38 @@ exports.signup = (req, res) => {
           department: req.body.department,
           role: req.body.role,
         });
-        user
-          .save()
+
+        user.save()
           .then((result) => {
             res.status(201).json({
-              message: "User created",
+              message: "User created successfully",
               createdUser: {
                 email: result.email,
-                _id: result._id,
+                id: result._id,
               },
             });
           })
           .catch((err) => {
-            res.status(500).json({
-              error: err.message,
-            });
+            // Handle validation and duplicate key errors
+            if (err.code === 11000) {
+              const duplicateField = Object.keys(err.keyPattern)[0];
+              const message = duplicateField === "email" 
+                ? "Email already registered" 
+                : "Register number already exists";
+              return res.status(409).json({ error: message });
+            }
+
+            if (err.errors?.RegisterNumber) {
+              return res.status(400).json({ error: err.errors.RegisterNumber.message });
+            }
+
+            res.status(500).json({ error: "An error occurred while creating the user" });
           });
       });
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
+      console.error(err);
+      res.status(500).json({ error: "Database query failed" });
     });
 };
 
@@ -72,8 +78,10 @@ exports.login = (req, res) => {
         if (result) {
           const token = jwt.sign(
             {
-              email: user[0].email,
               userId: user[0]._id,
+              email: user[0].email,
+              name: user[0].name,
+              role: user[0].role,
             },
             process.env.JWT_KEY,
             {
@@ -82,7 +90,10 @@ exports.login = (req, res) => {
           );
           return res.status(200).json({
             message: "Auth successful",
+            userId: user[0]._id,
             token: token,
+            name: user[0].name,
+            RegisterNumber: user[0].RegisterNumber,
           });
         }
         res.status(401).json({

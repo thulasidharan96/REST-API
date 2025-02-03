@@ -1,35 +1,33 @@
 const mongoose = require('mongoose');
-const moment = require('moment-timezone'); // Import moment-timezone for timezone handling
+const moment = require('moment-timezone');
 
-// Define the schema for student attendance
 const studentAttendanceSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Unique identifier for each record
+  _id: mongoose.Schema.Types.ObjectId,
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true // Ensure the user ID is mandatory
+    required: true
   },
-  dateTime: {
-    type: Date,
+  dateOnly: {
+    type: String,
     required: true,
-    // Automatically set attendance time in India/Kolkata timezone
-    default: () => moment.tz(new Date(), "Asia/Kolkata").toDate()
+    default: () => moment.tz(new Date(), "Asia/Kolkata").format('YYYY-MM-DD') // Only stores date part
   },
   attendanceStatus: {
     type: String,
     required: true,
-    enum: ['present', 'absent', 'late'], // Allow only specific attendance statuses
-    default: 'present' // Default to "present"
+    enum: ['present', 'absent', 'late'],
+    default: 'present'
   },
   department: {
     type: String,
     required: true,
-    enum: ['CSE', 'ECE', 'EEE', 'MECH'], // Restrict departments to a predefined list
-    default: 'CSE' // Default department is "CSE"
+    enum: ['CSE', 'ECE', 'EEE', 'MECH'],
+    default: 'CSE'
   }
 });
 
-// Index to prevent duplicate attendance records for the same user on the same date and time
-studentAttendanceSchema.index({ userId: 1, dateTime: 1 }, { unique: true });
+// Unique index to ensure a user can only have one attendance per day
+studentAttendanceSchema.index({ userId: 1, dateOnly: 1 }, { unique: true });
 
 module.exports = mongoose.model('StudentAttendance', studentAttendanceSchema);
