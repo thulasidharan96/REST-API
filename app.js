@@ -7,6 +7,8 @@ require('dotenv').config();
 
 const userRoutes = require('./api/routes/user');
 const attendanceRoutes = require('./api/routes/attendance');
+const adminRoutes = require('./api/routes/admin'); // or the correct path to your admin routes
+
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
@@ -27,12 +29,16 @@ app.use((req, res, next) => {
 });
 
 app.use('/user', userRoutes);
+
 app.use('/attendance', attendanceRoutes);
 app.use('/getAttendance', attendanceRoutes);
+
+app.use('/admin', adminRoutes);  // routes with the '/admin' prefix
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
     error.status = 404;
+    console.log(error);
     next(error);
 });
 

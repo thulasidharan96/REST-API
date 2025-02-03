@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 
 const checkAuth = require("../middleware/check-auth");
-const checkAdmin = require("../middleware/check-admin");
+const checkAdmin = require("../middleware/checkadmin");
 const UserController = require("../controllers/users");
 
 router.post("/signup", UserController.signup);
