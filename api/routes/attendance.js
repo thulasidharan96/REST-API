@@ -30,6 +30,8 @@ router.post("/", checkAuth, (req, res, next) => {
   const studentAttendance = new StudentAttendance({
     _id: new mongoose.Types.ObjectId(),
     userId: req.body.userId,
+    name: req.body.name,
+    registrationNumber: req.body.registrationNumber,
     date: req.body.date,
     attendanceStatus: req.body.attendanceStatus,
     department: req.body.department

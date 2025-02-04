@@ -94,6 +94,7 @@ exports.login = (req, res) => {
             token: token,
             name: user[0].name,
             RegisterNumber: user[0].RegisterNumber,
+            department: user[0].department,
           });
         }
         res.status(401).json({

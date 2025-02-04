@@ -8,6 +8,14 @@ const studentAttendanceSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  name: {
+    type: String,
+    required: true
+  },
+  registrationNumber: {
+    type: String,
+    required: true
+  },
   dateOnly: {
     type: String,
     required: true,
@@ -16,7 +24,7 @@ const studentAttendanceSchema = new mongoose.Schema({
   attendanceStatus: {
     type: String,
     required: true,
-    enum: ['present', 'absent', 'late'],
+    enum: ['present', 'leave'],
     default: 'present'
   },
   department: {
