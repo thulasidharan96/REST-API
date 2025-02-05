@@ -89,12 +89,12 @@ exports.login = (req, res) => {
             }
           );
           return res.status(200).json({
-            message: "Auth successful",
             userId: user[0]._id,
             token: token,
             name: user[0].name,
             RegisterNumber: user[0].RegisterNumber,
             department: user[0].department,
+            role: user[0].role,
           });
         }
         res.status(401).json({

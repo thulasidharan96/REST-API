@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment-timezone");
 const StudentAttendance = require("../models/studentAttendance");
+const message = require("../models/message");
 const User = require("../models/user");
 const checkAuth = require("../middleware/check-auth");
 const checkadmin = require("../middleware/checkadmin");
@@ -166,6 +167,49 @@ router.get("/search/:userId", checkAuth, checkadmin, (req, res, next) => {
       res.status(500).json({
         message: "An error occurred while fetching attendance records",
         error: err,
+      });
+    });
+});
+
+// Message Post API
+router.post("/message", checkAuth, checkadmin, (req, res, next) => {
+  const { userId, message: rawMessage } = req.body; // Rename message from req.body to avoid conflict
+  console.log(req.body);
+  const trimmedMessage = rawMessage.trim();
+
+  if (!trimmedMessage) {
+    return res.status(400).json({
+      message: "Message cannot be empty",
+    });
+  }
+
+  if (trimmedMessage.length > 100) {
+    return res.status(400).json({
+      message: "Message cannot be more than 100 characters",
+    });
+  }
+
+  // If the message is valid, save it to the database.
+  const newMessage = new message({ // Use the imported message model
+    userId: userId,
+    message: trimmedMessage,
+  });
+
+  newMessage.save()
+    .then(result => {
+      res.status(201).json({
+        message: "Message sent successfully",
+        createdMessage: {
+          userId: result.userId,
+          message: result.message,
+          _id: result._id
+        }
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
       });
     });
 });
