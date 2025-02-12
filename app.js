@@ -10,7 +10,7 @@ const attendanceRoutes = require('./api/routes/attendance');
 const adminRoutes = require('./api/routes/admin'); // or the correct path to your admin routes
 
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGODB_URI);
 mongoose.Promise = global.Promise;
 
 
