@@ -87,7 +87,6 @@ router.get("/all", checkAuth, checkadmin, (req, res, next) => {
     });
 });
 
-
 //get Student's attendance by registration number
 router.get("/:registrationNumber", checkAuth, checkadmin, (req, res, next) => {
   const registrationNumber = req.params.registrationNumber;
@@ -100,7 +99,8 @@ router.get("/:registrationNumber", checkAuth, checkadmin, (req, res, next) => {
     .then((docs) => {
       if (!docs || docs.length === 0) {
         return res.status(404).json({
-          message: "No attendance records found for the given registration number",
+          message:
+            "No attendance records found for the given registration number",
         });
       }
 
@@ -117,40 +117,46 @@ router.get("/:registrationNumber", checkAuth, checkadmin, (req, res, next) => {
 });
 
 // Get attendance by department and date
-router.get("/department/:department", checkAuth, checkadmin, (req, res, next) => {
-  const department = req.params.department;
-  console.log(req.params);
-  
-  StudentAttendance.find({ department: department }) 
-    .select("userId attendanceStatus _id dateOnly department name registrationNumber")
-    .exec()
-    .then((docs) => {
-      if (!docs || docs.length === 0) {
-        return res.status(404).json({
-          message: "No attendance records found for the given department",
-        });
-      }
-      res.status(200).json({
-        message: "Attendance records fetched successfully",
-        records: docs,
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: "An error occurred while fetching attendance records",
-        error: err,
-      });
-    });
-});
+router.get(
+  "/department/:department",
+  checkAuth,
+  checkadmin,
+  (req, res, next) => {
+    const department = req.params.department;
+    console.log(req.params);
 
+    StudentAttendance.find({ department: department })
+      .select(
+        "userId attendanceStatus _id dateOnly department name registrationNumber"
+      )
+      .exec()
+      .then((docs) => {
+        if (!docs || docs.length === 0) {
+          return res.status(404).json({
+            message: "No attendance records found for the given department",
+          });
+        }
+        res.status(200).json({
+          message: "Attendance records fetched successfully",
+          records: docs,
+        });
+      })
+      .catch((err) => {
+        res.status(500).json({
+          message: "An error occurred while fetching attendance records",
+          error: err,
+        });
+      });
+  }
+);
 
 // Get User Info by UserId
 router.get("/search/:userId", checkAuth, checkadmin, (req, res, next) => {
   const userId = req.params.userId;
   console.log(req.params);
-  
+
   User.find({ RegisterNumber: userId })
-    .select("userId _id email department name registrationNumber")
+    .select("userId _id email department name registerNumber)")
     .exec()
     .then((docs) => {
       if (!docs || docs.length === 0) {
@@ -190,29 +196,30 @@ router.post("/message", checkAuth, checkadmin, (req, res, next) => {
   }
 
   // If the message is valid, save it to the database.
-  const newMessage = new message({ // Use the imported message model
+  const newMessage = new message({
+    // Use the imported message model
     userId: userId,
     message: trimmedMessage,
   });
 
-  newMessage.save()
-    .then(result => {
+  newMessage
+    .save()
+    .then((result) => {
       res.status(201).json({
         message: "Message sent successfully",
         createdMessage: {
           userId: result.userId,
           message: result.message,
-          _id: result._id
-        }
+          _id: result._id,
+        },
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       res.status(500).json({
-        error: err
+        error: err,
       });
     });
 });
-
 
 module.exports = router;
