@@ -5,6 +5,7 @@ const router = express.Router();
 const moment = require("moment-timezone");
 const StudentAttendance = require("../models/studentAttendance");
 const message = require("../models/message");
+const Announcement = require("../models/anouncement");
 const User = require("../models/user");
 const checkAuth = require("../middleware/check-auth");
 const checkadmin = require("../middleware/checkadmin");
@@ -223,3 +224,33 @@ router.post("/message", checkAuth, checkadmin, (req, res, next) => {
 });
 
 module.exports = router;
+
+// Announcement for all users
+router.post("/announcement", checkAuth, checkadmin, (req, res, next) => {
+  const { title, announcement } = req.body;
+
+  const newAnnouncement = new Announcement({
+    title,
+    announcement,
+  });
+
+  newAnnouncement
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        message: "Announcement created successfully",
+        createdAnnouncement: {
+          _id: result._id,
+          title: result.title,
+          announcement: result.announcement,
+        },
+      });
+    })
+    .catch((err) => {
+      console.error(err); // Log the error for debugging
+      res.status(500).json({
+        message: "An error occurred while creating the announcement",
+        error: err.message,
+      });
+    });
+});

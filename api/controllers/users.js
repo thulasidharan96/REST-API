@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
+const StudentAttendance = require("../models/studentAttendance");
 
 exports.signup = (req, res) => {
   User.findOne({ email: req.body.email })
@@ -13,7 +14,9 @@ exports.signup = (req, res) => {
       }
       bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) {
-          return res.status(500).json({ error: "Error encrypting the password" });
+          return res
+            .status(500)
+            .json({ error: "Error encrypting the password" });
         }
 
         const user = new User({
@@ -26,7 +29,8 @@ exports.signup = (req, res) => {
           role: req.body.role,
         });
 
-        user.save()
+        user
+          .save()
           .then((result) => {
             res.status(201).json({
               message: "User created successfully",
@@ -40,17 +44,22 @@ exports.signup = (req, res) => {
             // Handle validation and duplicate key errors
             if (err.code === 11000) {
               const duplicateField = Object.keys(err.keyPattern)[0];
-              const message = duplicateField === "email" 
-                ? "Email already registered" 
-                : "Register number already exists";
+              const message =
+                duplicateField === "email"
+                  ? "Email already registered"
+                  : "Register number already exists";
               return res.status(409).json({ error: message });
             }
 
             if (err.errors?.RegisterNumber) {
-              return res.status(400).json({ error: err.errors.RegisterNumber.message });
+              return res
+                .status(400)
+                .json({ error: err.errors.RegisterNumber.message });
             }
 
-            res.status(500).json({ error: "An error occurred while creating the user" });
+            res
+              .status(500)
+              .json({ error: "An error occurred while creating the user" });
           });
       });
     })
@@ -110,18 +119,31 @@ exports.login = (req, res) => {
     });
 };
 
-exports.user_delete = (req, res) => {
-  User.deleteOne({ _id: req.params.userId })
-    .exec()
-    .then((result) => {
-      res.status(200).json({
-        message: "User deleted",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
+exports.user_delete = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Delete user
+    const userDeleteResult = await User.deleteOne({ _id: userId });
+
+    if (userDeleteResult.deletedCount === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete related attendance records
+    const attendanceDeleteResult = await StudentAttendance.deleteMany({
+      userId: userId,
     });
+
+    res.status(200).json({
+      message: "User and associated attendance records deleted",
+      userDeleted: userDeleteResult.deletedCount,
+      attendanceDeleted: attendanceDeleteResult.deletedCount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
 };
