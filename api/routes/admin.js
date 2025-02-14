@@ -156,7 +156,7 @@ router.get("/search/:userId", checkAuth, checkadmin, (req, res, next) => {
   console.log(req.params);
 
   User.find({ RegisterNumber: userId })
-    .select("userId _id email department name RegisterNumber)")
+    .select("_id email department name RegisterNumber")
     .exec()
     .then((docs) => {
       if (!docs || docs.length === 0) {
