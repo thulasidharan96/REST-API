@@ -254,3 +254,31 @@ router.post("/announcement", checkAuth, checkadmin, (req, res, next) => {
       });
     });
 });
+
+//Get Leave Stats
+// router.get("/leave/:userId", checkAuth, (req, res, next) => {
+//   const userId = req.params.userId;
+
+//   // Validate userId format
+//   if (!mongoose.Types.ObjectId.isValid(userId)) {
+//     return res.status(400).json({ message: "Invalid userId format" });
+//   }
+
+//   // Find leave requests by userId
+//   LeaveRequest.find({ user: new mongoose.Types.ObjectId(userId) })
+//     .exec()
+//     .then((docs) => {
+//       console.log("From database", docs);
+//       if (docs && docs.length > 0) {
+//         res.status(200).json(docs);
+//       } else {
+//         res.status(404).json({
+//           message: "No valid entry found for provided userId",
+//         });
+//       }
+//     })
+//     .catch((err) => {
+//       console.error("Database query error", err);
+//       res.status(500).json({ error: err });
+//     });
+// });

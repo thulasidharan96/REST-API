@@ -154,7 +154,7 @@ exports.user_delete = async (req, res) => {
 // Leave request
 exports.leaveRequest = async (req, res) => {
   try {
-    const { StartDate, EndDate, Reason, userId } = req.body;
+    const { StartDate, EndDate, Reason, userId, RegisterNumber } = req.body;
     // console.log(req.body);
 
     // Validate required fields
@@ -182,8 +182,21 @@ exports.leaveRequest = async (req, res) => {
 
     // console.log("Decoded user data:", req.userData); // Log the decoded user data
 
+    // Check if the user has a pending or approved leave request
+    const existingLeaveRequest = await LeaveRequest.findOne({
+      user: userId,
+      status: { $in: ["Pending"] },
+    });
+
+    if (existingLeaveRequest) {
+      return res.status(400).json({
+        error: "You already have a pending leave request.",
+      });
+    }
+
     // Create a new leave request
     const leaveRequest = new LeaveRequest({
+      RegisterNumber: RegisterNumber,
       StartDate: startDate,
       EndDate: endDate,
       Reason,
