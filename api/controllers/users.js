@@ -4,7 +4,9 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 const StudentAttendance = require("../models/studentAttendance");
+const LeaveRequest = require("../models/LeaveRequest");
 
+// Register
 exports.signup = (req, res) => {
   User.findOne({ email: req.body.email })
     .exec()
@@ -41,7 +43,6 @@ exports.signup = (req, res) => {
             });
           })
           .catch((err) => {
-            // Handle validation and duplicate key errors
             if (err.code === 11000) {
               const duplicateField = Object.keys(err.keyPattern)[0];
               const message =
@@ -69,6 +70,7 @@ exports.signup = (req, res) => {
     });
 };
 
+// Login
 exports.login = (req, res) => {
   User.find({ email: req.body.email })
     .exec()
@@ -119,6 +121,7 @@ exports.login = (req, res) => {
     });
 };
 
+// Delete user
 exports.user_delete = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -145,5 +148,71 @@ exports.user_delete = async (req, res) => {
     res.status(500).json({
       error: err.message,
     });
+  }
+};
+
+// Leave request
+exports.leaveRequest = async (req, res) => {
+  try {
+    const { StartDate, EndDate, Reason, userId } = req.body;
+    // console.log(req.body);
+
+    // Validate required fields
+    if (!StartDate || !EndDate || !Reason || !userId) {
+      return res.status(400).json({
+        error: "All fields (StartDate, EndDate, Reason, userId) are required.",
+      });
+    }
+
+    // Validate date formats
+    const startDate = new Date(StartDate);
+    const endDate = new Date(EndDate);
+    if (isNaN(startDate) || isNaN(endDate)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid date format for StartDate or EndDate." });
+    }
+
+    // Check if EndDate is after StartDate
+    if (endDate <= startDate) {
+      return res
+        .status(400)
+        .json({ error: "EndDate must be after StartDate." });
+    }
+
+    // console.log("Decoded user data:", req.userData); // Log the decoded user data
+
+    // Create a new leave request
+    const leaveRequest = new LeaveRequest({
+      StartDate: startDate,
+      EndDate: endDate,
+      Reason,
+      user: userId,
+      status: "Pending", // Initial status
+      requestedAt: new Date(),
+    });
+
+    // Save the leave request to the database
+    await leaveRequest.save();
+
+    return res
+      .status(201)
+      .json({ message: "Leave request submitted successfully." });
+  } catch (err) {
+    // Log the error details for troubleshooting
+    console.error("Error submitting leave request:", err);
+
+    // Check for specific errors and provide more detailed messages
+    if (err.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ error: "Validation error: " + err.message });
+    } else if (err.name === "MongoError" && err.code === 11000) {
+      return res
+        .status(400)
+        .json({ error: "Duplicate leave request detected." });
+    } else {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
   }
 };
