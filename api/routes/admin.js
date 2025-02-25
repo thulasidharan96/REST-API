@@ -274,11 +274,41 @@ router.get("/leave/pending", checkAuth, checkadmin, async (req, res) => {
       leaveRequests: pendingLeaveRequests,
     });
   } catch (error) {
+    res.status(500).json({
+      message: "Error fetching pending leave requests",
+      error: error.message,
+    });
+  }
+});
+
+//Update Leave Request by Aproving||Rejecting
+router.patch("/leave/:id", checkAuth, checkadmin, async (req, res) => {
+  const leaveId = req.params.id;
+  const { status } = req.body;
+
+  try {
+    // Validate status input
+    if (!["Approved", "Rejected"].includes(status)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid status. Must be 'approved' or 'rejected'." });
+    }
+
+    // Find the leave request
+    const leaveRequest = await LeaveRequest.findById(leaveId);
+    if (!leaveRequest) {
+      return res.status(404).json({ error: "Leave request not found." });
+    }
+
+    // Update the status
+    leaveRequest.status = status;
+    await leaveRequest.save();
+
+    res.json({ message: `Leave request ${status} successfully.` });
+  } catch (error) {
+    console.error("Error updating leave request:", error);
     res
       .status(500)
-      .json({
-        message: "Error fetching pending leave requests",
-        error: error.message,
-      });
+      .json({ error: "An error occurred while updating the leave request." });
   }
 });
