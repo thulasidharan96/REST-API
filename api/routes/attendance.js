@@ -84,7 +84,7 @@ router.get("/message/:userId", checkAuth, (req, res, next) => {
     });
 });
 
-//Get User Leave Latest Stats
+// Get User Leave Latest Stats
 router.get("/leave/:userId", checkAuth, async (req, res, next) => {
   const userId = req.params.userId;
 
@@ -94,32 +94,35 @@ router.get("/leave/:userId", checkAuth, async (req, res, next) => {
   }
 
   try {
+    // Convert userId to ObjectId for MongoDB query
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
     // Check for a pending leave request
     const pendingLeaveRequest = await LeaveRequest.findOne({
-      user: new mongoose.Types.ObjectId(userId),
+      user: userObjectId,
       status: "Pending",
-    });
+    }).sort({ requestedAt: -1 }); // Get the latest pending request, if any
 
     // Find the most recent leave request by userId
     const recentLeaveRequest = await LeaveRequest.findOne({
-      user: new mongoose.Types.ObjectId(userId),
-    }).sort({ createdAt: -1 });
+      user: userObjectId,
+    }).sort({ requestedAt: -1 }); // Get the most recent request
 
-    // If there is no valid entry for the provided userId
+    // If there is no leave request for the provided userId
     if (!recentLeaveRequest) {
       return res.status(404).json({
-        message: "No valid entry found for provided userId",
+        message: "No leave request found for the provided userId",
       });
     }
 
-    // Respond with both pending leave request and recent leave request
+    // Respond with both pending leave request (if any) and recent leave request
     res.status(200).json({
-      // pendingLeaveRequest: pendingLeaveRequest || null,
       recentLeaveRequest: recentLeaveRequest,
+      pendingLeaveRequest: pendingLeaveRequest || null, // Return null if no pending request
     });
   } catch (err) {
     console.error("Database query error", err);
-    res.status(500).json({ error: err });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
