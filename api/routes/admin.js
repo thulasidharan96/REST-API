@@ -9,6 +9,7 @@ const Announcement = require("../models/anouncement");
 const User = require("../models/user");
 const checkAuth = require("../middleware/check-auth");
 const checkadmin = require("../middleware/checkadmin");
+const LeaveRequest = require("../models/LeaveRequest");
 
 router.get("/", checkAuth, checkadmin, (req, res, next) => {
   const currentDate = moment
@@ -255,30 +256,29 @@ router.post("/announcement", checkAuth, checkadmin, (req, res, next) => {
     });
 });
 
-//Get Leave Stats
-// router.get("/leave/:userId", checkAuth, (req, res, next) => {
-//   const userId = req.params.userId;
+// Get all pending leave requests with user details
+router.get("/leave/pending", checkAuth, checkadmin, async (req, res) => {
+  try {
+    const pendingLeaveRequests = await LeaveRequest.find({
+      status: "Pending",
+    }).populate("user", "name email RegisterNumber"); // Adjust fields as needed
 
-//   // Validate userId format
-//   if (!mongoose.Types.ObjectId.isValid(userId)) {
-//     return res.status(400).json({ message: "Invalid userId format" });
-//   }
+    if (!pendingLeaveRequests || pendingLeaveRequests.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No pending leave requests found" });
+    }
 
-//   // Find leave requests by userId
-//   LeaveRequest.find({ user: new mongoose.Types.ObjectId(userId) })
-//     .exec()
-//     .then((docs) => {
-//       console.log("From database", docs);
-//       if (docs && docs.length > 0) {
-//         res.status(200).json(docs);
-//       } else {
-//         res.status(404).json({
-//           message: "No valid entry found for provided userId",
-//         });
-//       }
-//     })
-//     .catch((err) => {
-//       console.error("Database query error", err);
-//       res.status(500).json({ error: err });
-//     });
-// });
+    res.status(200).json({
+      message: "Pending leave requests fetched successfully",
+      leaveRequests: pendingLeaveRequests,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message: "Error fetching pending leave requests",
+        error: error.message,
+      });
+  }
+});
