@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const LeaveRequestSchema = new mongoose.Schema(
   {
     RegisterNumber: { type: String, required: true },
+    Department: {
+      type: String,
+      required: true,
+    },
     StartDate: { type: Date, required: true },
     EndDate: { type: Date, required: true },
     Reason: { type: String, required: true },

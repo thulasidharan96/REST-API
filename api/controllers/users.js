@@ -154,11 +154,19 @@ exports.user_delete = async (req, res) => {
 // Leave request
 exports.leaveRequest = async (req, res) => {
   try {
-    const { StartDate, EndDate, Reason, userId, RegisterNumber } = req.body;
+    const { StartDate, EndDate, Reason, userId, RegisterNumber, Department } =
+      req.body;
     // console.log(req.body);
 
     // Validate required fields
-    if (!StartDate || !EndDate || !Reason || !userId) {
+    if (
+      !StartDate ||
+      !EndDate ||
+      !Reason ||
+      !userId ||
+      !RegisterNumber ||
+      !Department
+    ) {
       return res.status(400).json({
         error: "All fields (StartDate, EndDate, Reason, userId) are required.",
       });
@@ -197,6 +205,7 @@ exports.leaveRequest = async (req, res) => {
     // Create a new leave request
     const leaveRequest = new LeaveRequest({
       RegisterNumber: RegisterNumber,
+      Department: Department,
       StartDate: startDate,
       EndDate: endDate,
       Reason,
