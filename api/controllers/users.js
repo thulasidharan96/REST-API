@@ -139,6 +139,7 @@ exports.get_math_question = async (req, res) => {
 
     res.json({
       question: `${num1} + ${num2} = ?`,
+      correctAnswer: num1 + num2,
     });
   } catch (err) {
     console.error(err);
