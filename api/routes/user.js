@@ -14,4 +14,6 @@ router.delete("/:userId", checkAuth, checkAdmin, UserController.user_delete);
 
 router.post("/leave", checkAuth, UserController.leaveRequest);
 
+router.get("/announcement", checkAuth, UserController.getAnnouncements);
+
 module.exports = router;

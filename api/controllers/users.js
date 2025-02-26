@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const StudentAttendance = require("../models/studentAttendance");
 const LeaveRequest = require("../models/LeaveRequest");
+const anouncement = require("../models/anouncement");
 
 // Register
 exports.signup = (req, res) => {
@@ -236,5 +237,28 @@ exports.leaveRequest = async (req, res) => {
     } else {
       return res.status(500).json({ error: "Internal Server Error" });
     }
+  }
+};
+
+
+exports.getAnnouncements = async (req, res) => {
+  try {
+    const announcements = await anouncement.find().sort({ date: -1 }); // Sort by latest first
+
+    res.status(200).json({
+      success: true,
+      data: announcements.map((ann) => ({
+        id: ann._id,
+        title: ann.title,
+        message: ann.announcement, // Assuming "announcement" is the correct field name
+        date: ann.date,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch announcements",
+      error: error.message,
+    });
   }
 };
