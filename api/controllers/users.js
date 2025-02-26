@@ -145,7 +145,7 @@ exports.user_delete = async (req, res) => {
     const { userAnswer, correctAnswer } = req.body;
 
     // Verify math answer before deleting the user
-    if (parseInt(userAnswer) !== parseInt(correctAnswer)) {
+    if (parseInt(userAnswer, 10) !== parseInt(correctAnswer, 10)) {
       return res.status(400).json({ message: "Incorrect math answer" });
     }
 
