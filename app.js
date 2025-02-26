@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const session = require("express-session");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -8,6 +9,15 @@ require("dotenv").config();
 const userRoutes = require("./api/routes/user");
 const attendanceRoutes = require("./api/routes/attendance");
 const adminRoutes = require("./api/routes/admin");
+
+app.use(
+  session({
+    secret: process.env.JWT_KEY, // Change this to a secure key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false, maxAge: 60000 }, // Set to true if using HTTPS
+  })
+);
 
 // ✅ Connect to MongoDB (without deprecated options)
 mongoose.connect(process.env.MONGODB_URI);

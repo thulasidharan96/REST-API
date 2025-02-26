@@ -130,8 +130,12 @@ exports.get_math_question = async (req, res) => {
     const num2 = Math.floor(Math.random() * 10) + 1;
     const correctAnswer = num1 + num2;
 
-    // Store answer in session
-    req.session.mathChallenge = correctAnswer;
+    // Ensure req.session exists before setting values
+    if (!req.session) {
+      return res.status(500).json({ error: "Session not initialized" });
+    }
+
+    req.session.mathChallenge = correctAnswer; // Store in session
 
     res.json({
       question: `${num1} + ${num2} = ?`,
