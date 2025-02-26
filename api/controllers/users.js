@@ -122,10 +122,32 @@ exports.login = (req, res) => {
     });
 };
 
-// Delete user
+// Generate random math question
+exports.get_math_question = async (req, res) => {
+  try {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+
+    res.json({
+      question: `${num1} + ${num2} = ?`,
+      correctAnswer: num1 + num2, // This will be sent to frontend for validation
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error generating math question" });
+  }
+};
+
+// Delete user with math verification
 exports.user_delete = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const { userId } = req.params;
+    const { userAnswer, correctAnswer } = req.body;
+
+    // Verify math answer before deleting the user
+    if (parseInt(userAnswer) !== parseInt(correctAnswer)) {
+      return res.status(400).json({ message: "Incorrect math answer" });
+    }
 
     // Delete user
     const userDeleteResult = await User.deleteOne({ _id: userId });
@@ -146,9 +168,7 @@ exports.user_delete = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      error: err.message,
-    });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -239,7 +259,6 @@ exports.leaveRequest = async (req, res) => {
     }
   }
 };
-
 
 exports.getAnnouncements = async (req, res) => {
   try {

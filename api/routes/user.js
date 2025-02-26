@@ -16,4 +16,11 @@ router.post("/leave", checkAuth, UserController.leaveRequest);
 
 router.get("/announcement", checkAuth, UserController.getAnnouncements);
 
+router.get(
+  "/mathquestion",
+  checkAuth,
+  checkAdmin,
+  UserController.get_math_question
+);
+
 module.exports = router;

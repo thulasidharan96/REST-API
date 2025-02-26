@@ -1,4 +1,5 @@
 // /routes/studentAttendance.js
+const bcrypt = require("bcrypt");
 
 const express = require("express");
 const router = express.Router();
@@ -281,6 +282,7 @@ router.get("/leave/pending", checkAuth, checkadmin, async (req, res) => {
   }
 });
 
+
 //Update Leave Request by Aproving||Rejecting
 router.patch("/leave/:id", checkAuth, checkadmin, async (req, res) => {
   const leaveId = req.params.id;
@@ -310,5 +312,37 @@ router.patch("/leave/:id", checkAuth, checkadmin, async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while updating the leave request." });
+  }
+});
+
+// User Password Change Route
+router.patch("/password", checkAuth, checkadmin, async (req, res) => {
+  try {
+    const { RegisterNumber, password } = req.body; // Extract fields
+
+    if (!RegisterNumber || !password) {
+      return res
+        .status(400)
+        .json({ error: "Missing RegisterNumber or password" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the user's password
+    const updatedUser = await User.findOneAndUpdate(
+      { RegisterNumber },
+      { $set: { password: hashedPassword } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
