@@ -12,10 +12,10 @@ const adminRoutes = require("./api/routes/admin");
 
 app.use(
   session({
-    secret: process.env.JWT_KEY, // Change this to a secure key
+    secret: process.env.JWT_KEY,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 60000 }, // Set to true if using HTTPS
+    saveUninitialized: true, // Ensure new sessions are saved
+    cookie: { secure: false, maxAge: 60000 }, // Adjust maxAge (1 min)
   })
 );
 

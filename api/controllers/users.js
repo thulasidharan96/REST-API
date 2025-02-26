@@ -130,17 +130,11 @@ exports.get_math_question = async (req, res) => {
     const num2 = Math.floor(Math.random() * 10) + 1;
     const correctAnswer = num1 + num2;
 
-    // Ensure req.session exists before setting values
-    if (!req.session) {
-      return res.status(500).json({ error: "Session not initialized" });
-    }
-
     req.session.mathChallenge = correctAnswer; // Store in session
 
-    res.json({
-      question: `${num1} + ${num2} = ?`,
-      correctAnswer: num1 + num2,
-    });
+    console.log("Stored Math Challenge:", req.session.mathChallenge); // Debugging
+
+    res.json({ question: `${num1} + ${num2} = ?`, correctAnswer: num1 + num2 });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error generating math question" });
@@ -154,16 +148,16 @@ exports.user_delete = async (req, res) => {
     const { userAnswer } = req.body;
 
     // Validate session-stored answer
-    const correctAnswer = req.session.mathChallenge;
-    if (!correctAnswer) {
-      return res
-        .status(400)
-        .json({ message: "Math challenge expired or not found" });
-    }
+    // const correctAnswer = req.session.mathChallenge;
+    // if (!correctAnswer) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Math challenge expired or not found" });
+    // }
 
-    if (parseInt(userAnswer, 10) !== correctAnswer) {
-      return res.status(400).json({ message: "Incorrect math answer" });
-    }
+    // if (parseInt(userAnswer, 10) !== correctAnswer) {
+    //   return res.status(400).json({ message: "Incorrect math answer" });
+    // }
 
     // Delete user
     const userDeleteResult = await User.deleteOne({ _id: userId });
