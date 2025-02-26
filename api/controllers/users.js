@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const session = require("express-session");
 
 const User = require("../models/user");
 const StudentAttendance = require("../models/studentAttendance");
@@ -127,10 +128,13 @@ exports.get_math_question = async (req, res) => {
   try {
     const num1 = Math.floor(Math.random() * 10) + 1;
     const num2 = Math.floor(Math.random() * 10) + 1;
+    const correctAnswer = num1 + num2;
+
+    // Store answer in session
+    req.session.mathChallenge = correctAnswer;
 
     res.json({
       question: `${num1} + ${num2} = ?`,
-      correctAnswer: num1 + num2, // This will be sent to frontend for validation
     });
   } catch (err) {
     console.error(err);
@@ -142,24 +146,33 @@ exports.get_math_question = async (req, res) => {
 exports.user_delete = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { userAnswer, correctAnswer } = req.body;
+    const { userAnswer } = req.body;
 
-    // Verify math answer before deleting the user
-    if (parseInt(userAnswer, 10) !== parseInt(correctAnswer, 10)) {
+    // Validate session-stored answer
+    const correctAnswer = req.session.mathChallenge;
+    if (!correctAnswer) {
+      return res
+        .status(400)
+        .json({ message: "Math challenge expired or not found" });
+    }
+
+    if (parseInt(userAnswer, 10) !== correctAnswer) {
       return res.status(400).json({ message: "Incorrect math answer" });
     }
 
     // Delete user
     const userDeleteResult = await User.deleteOne({ _id: userId });
-
     if (userDeleteResult.deletedCount === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Delete related attendance records
     const attendanceDeleteResult = await StudentAttendance.deleteMany({
-      userId: userId,
+      userId,
     });
+
+    // Clear session
+    req.session.mathChallenge = null;
 
     res.status(200).json({
       message: "User and associated attendance records deleted",
