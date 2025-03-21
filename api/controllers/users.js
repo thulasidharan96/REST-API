@@ -63,6 +63,7 @@ exports.signup = (req, res) => {
             res
               .status(500)
               .json({ error: "An error occurred while creating the user" });
+            console.error(err);
           });
       });
     })
@@ -95,6 +96,7 @@ exports.login = (req, res) => {
               email: user[0].email,
               name: user[0].name,
               role: user[0].role,
+              onboard: user[0].onboard,
             },
             process.env.JWT_KEY,
             {
@@ -107,7 +109,7 @@ exports.login = (req, res) => {
             name: user[0].name,
             RegisterNumber: user[0].RegisterNumber,
             department: user[0].department,
-            role: user[0].role,
+            email: user[0].email,
           });
         }
         res.status(401).json({
